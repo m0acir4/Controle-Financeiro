@@ -52,17 +52,22 @@
     .form-row input:focus, .form-row select:focus { border-color: var(--text2); }
     .save-btn { background: var(--text); color: var(--bg); border: none; border-radius: var(--radius); padding: 8px 18px; cursor: pointer; font-size: 14px; white-space: nowrap; transition: opacity 0.15s; }
     .save-btn:hover { opacity: 0.85; }
+    .cat-wrapper { position: relative; flex: 1; min-width: 120px; }
+    .cat-wrapper select { width: 100%; }
+    #expCatCustom { display: none; width: 100%; padding: 8px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; background: var(--bg); color: var(--text); outline: none; }
+    #expCatCustom:focus { border-color: var(--text2); }
     .item-list { display: flex; flex-direction: column; gap: 6px; }
     .item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg2); border-radius: var(--radius); font-size: 14px; }
     .item-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
     .item-tag { font-size: 11px; padding: 3px 9px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
-    .tag-receita { background: #E1F5EE; color: #0F6E56; }
-    .tag-moradia { background: #E6F1FB; color: #185FA5; }
+    .tag-receita  { background: #E1F5EE; color: #0F6E56; }
+    .tag-moradia  { background: #E6F1FB; color: #185FA5; }
     .tag-alimentacao { background: #FAEEDA; color: #854F0B; }
-    .tag-transporte { background: #EEEDFE; color: #534AB7; }
-    .tag-saude { background: #FBEAF0; color: #993556; }
-    .tag-lazer { background: #FCEBEB; color: #A32D2D; }
-    .tag-outro { background: #F1EFE8; color: #5F5E5A; }
+    .tag-transporte  { background: #EEEDFE; color: #534AB7; }
+    .tag-saude    { background: #FBEAF0; color: #993556; }
+    .tag-lazer    { background: #FCEBEB; color: #A32D2D; }
+    .tag-outro    { background: #F1EFE8; color: #5F5E5A; }
+    .tag-custom   { background: #F1EFE8; color: #5F5E5A; }
     .item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .item-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
     .item-amount { font-weight: 500; }
@@ -130,14 +135,18 @@
     <div class="form-row hidden" id="formExp">
       <input type="text" id="expName" placeholder="Ex: Aluguel, Mercado..." />
       <input type="number" id="expAmount" placeholder="Valor em R$" min="0" step="0.01" />
-      <select id="expCat">
-        <option value="moradia">Moradia</option>
-        <option value="alimentacao">Alimentação</option>
-        <option value="transporte">Transporte</option>
-        <option value="saude">Saúde</option>
-        <option value="lazer">Lazer</option>
-        <option value="outro">Outro</option>
-      </select>
+      <div class="cat-wrapper">
+        <select id="expCat">
+          <option value="moradia">Moradia</option>
+          <option value="alimentacao">Alimentação</option>
+          <option value="transporte">Transporte</option>
+          <option value="saude">Saúde</option>
+          <option value="lazer">Lazer</option>
+          <option value="outro">Outro</option>
+          <option value="__custom__">+ Digitar categoria...</option>
+        </select>
+        <input type="text" id="expCatCustom" placeholder="Nome da categoria" />
+      </div>
       <button class="save-btn" id="saveExp">Salvar</button>
     </div>
     <div class="item-list" id="listExp"><div class="empty">Nenhuma despesa registrada</div></div>
@@ -158,9 +167,9 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
   const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const CATS = ['moradia','alimentacao','transporte','saude','lazer','outro'];
-  const CAT_LABELS = ['Moradia','Alimentação','Transporte','Saúde','Lazer','Outro'];
-  const CAT_COLORS = ['#378ADD','#EF9F27','#7F77DD','#D4537E','#E24B4A','#888780'];
+  const DEFAULT_CATS = ['moradia','alimentacao','transporte','saude','lazer','outro'];
+  const DEFAULT_LABELS = { moradia:'Moradia', alimentacao:'Alimentação', transporte:'Transporte', saude:'Saúde', lazer:'Lazer', outro:'Outro' };
+  const PALETTE = ['#378ADD','#EF9F27','#7F77DD','#D4537E','#E24B4A','#888780','#1D9E75','#B47ADE','#E8A838','#5DB8B0','#C45FA0','#6A8FD8'];
   const INC_COLOR = '#1D9E75';
   const EXP_COLOR = '#D85A30';
 
@@ -176,6 +185,41 @@
   }
   function save(data) { localStorage.setItem(key(), JSON.stringify(data)); }
   function fmt(n) { return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  function catLabel(cat) {
+    return DEFAULT_LABELS[cat] || cat;
+  }
+
+  function catClass(cat) {
+    if (DEFAULT_CATS.includes(cat)) return 'tag-' + cat;
+    return 'tag-custom';
+  }
+
+  const expCatSel = document.getElementById('expCat');
+  const expCatCustom = document.getElementById('expCatCustom');
+
+  expCatSel.addEventListener('change', () => {
+    if (expCatSel.value === '__custom__') {
+      expCatSel.style.display = 'none';
+      expCatCustom.style.display = 'block';
+      expCatCustom.focus();
+    }
+  });
+
+  expCatCustom.addEventListener('blur', () => {
+    if (!expCatCustom.value.trim()) {
+      expCatSel.style.display = 'block';
+      expCatCustom.style.display = 'none';
+      expCatSel.value = 'outro';
+    }
+  });
+
+  function resetCatInput() {
+    expCatSel.style.display = 'block';
+    expCatCustom.style.display = 'none';
+    expCatCustom.value = '';
+    expCatSel.value = 'moradia';
+  }
 
   function render() {
     document.getElementById('monthLabel').textContent = MONTHS[month] + ' ' + year;
@@ -202,7 +246,7 @@
     listExp.innerHTML = data.exp.length === 0
       ? '<div class="empty">Nenhuma despesa registrada</div>'
       : data.exp.map((it,i) => `<div class="item">
-          <div class="item-left"><span class="item-tag tag-${it.cat}">${CAT_LABELS[CATS.indexOf(it.cat)]}</span><span class="item-name">${escHtml(it.name)}</span></div>
+          <div class="item-left"><span class="item-tag ${catClass(it.cat)}">${escHtml(catLabel(it.cat))}</span><span class="item-name">${escHtml(it.name)}</span></div>
           <div class="item-right"><span class="item-amount exp">${fmt(it.amount)}</span><button class="del-btn" onclick="delExp(${i})">&#x2715;</button></div>
         </div>`).join('');
 
@@ -210,19 +254,28 @@
   }
 
   function escHtml(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   function renderCharts(data, totalInc, totalExp) {
-    const catTotals = CATS.map(c => data.exp.filter(e => e.cat === c).reduce((s,i) => s + i.amount, 0));
+    // Group expenses by category (including custom ones)
+    const catMap = {};
+    data.exp.forEach(e => {
+      catMap[e.cat] = (catMap[e.cat] || 0) + e.amount;
+    });
+    const cats = Object.keys(catMap);
+    const catTotals = cats.map(c => catMap[c]);
+    const catColors = cats.map((_, i) => PALETTE[i % PALETTE.length]);
+    const catLabels = cats.map(c => catLabel(c));
+
     if(catChartInst) { catChartInst.destroy(); catChartInst = null; }
     if(barChartInst) { barChartInst.destroy(); barChartInst = null; }
 
     catChartInst = new Chart(document.getElementById('catChart'), {
       type: 'doughnut',
       data: {
-        labels: CAT_LABELS,
-        datasets: [{ data: catTotals, backgroundColor: CAT_COLORS, borderWidth: 0 }]
+        labels: catLabels,
+        datasets: [{ data: catTotals, backgroundColor: catColors, borderWidth: 0 }]
       },
       options: {
         responsive: true, maintainAspectRatio: false,
@@ -277,17 +330,27 @@
   document.getElementById('saveExp').onclick = () => {
     const name = document.getElementById('expName').value.trim();
     const amount = parseFloat(document.getElementById('expAmount').value);
-    const cat = document.getElementById('expCat').value;
     if(!name || isNaN(amount) || amount <= 0) return;
+
+    let cat;
+    if (expCatSel.style.display === 'none') {
+      cat = expCatCustom.value.trim();
+      if (!cat) return;
+    } else {
+      cat = expCatSel.value;
+    }
+
     const d = load(); d.exp.push({name, amount, cat}); save(d);
     document.getElementById('expName').value = '';
     document.getElementById('expAmount').value = '';
     document.getElementById('formExp').classList.add('hidden');
+    resetCatInput();
     render();
   };
 
   document.getElementById('incAmount').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveInc').click(); });
   document.getElementById('expAmount').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveExp').click(); });
+  expCatCustom.addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveExp').click(); });
 
   render();
 </script>
