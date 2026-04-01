@@ -3,356 +3,758 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Controle Financeiro</title>
+  <title>Finza — Controle Financeiro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg: #ffffff;
-      --bg2: #f5f5f3;
-      --bg3: #efefed;
-      --text: #1a1a18;
-      --text2: #6b6b67;
-      --border: rgba(0,0,0,0.12);
-      --border2: rgba(0,0,0,0.22);
-      --radius: 8px;
-      --radius-lg: 12px;
+      --bg-page:    #0d0d0f;
+      --bg-card:    #131316;
+      --bg-card2:   #1a1a1e;
+      --bg-input:   #1e1e23;
+      --bg-hover:   #222228;
+      --border:     rgba(255,255,255,0.07);
+      --border2:    rgba(255,255,255,0.12);
+      --border3:    rgba(255,255,255,0.18);
+      --text:       #f0ede8;
+      --text2:      #888884;
+      --text3:      #555552;
+      --accent:     #7c6dfa;
+      --accent-dim: rgba(124, 109, 250, 0.15);
+      --green:      #28c78b;
+      --green-dim:  rgba(40, 199, 139, 0.12);
+      --red:        #f2533d;
+      --red-dim:    rgba(242, 83, 61, 0.12);
+      --amber:      #f5a623;
+      --radius:     10px;
+      --radius-lg:  16px;
+      --radius-xl:  20px;
     }
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1e1e1c;
-        --bg2: #2a2a28;
-        --bg3: #333331;
-        --text: #f0ede8;
-        --text2: #9a9a94;
-        --border: rgba(255,255,255,0.12);
-        --border2: rgba(255,255,255,0.22);
-      }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-page);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 2rem 1rem 4rem;
+      -webkit-font-smoothing: antialiased;
     }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; padding: 2rem 1rem; }
-    .app { max-width: 820px; margin: 0 auto; }
-    .header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 12px; }
-    .header h1 { font-size: 22px; font-weight: 500; }
-    .month-nav { display: flex; align-items: center; gap: 8px; }
-    .month-nav button { background: var(--bg); border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 7px 14px; cursor: pointer; font-size: 14px; color: var(--text); transition: background 0.15s; }
-    .month-nav button:hover { background: var(--bg2); }
-    .month-label { font-size: 15px; font-weight: 500; min-width: 160px; text-align: center; }
-    .summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
-    .metric { background: var(--bg2); border-radius: var(--radius); padding: 16px 18px; }
-    .metric .label { font-size: 12px; color: var(--text2); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.04em; }
-    .metric .value { font-size: 24px; font-weight: 500; }
-    .value.positive { color: #1D9E75; }
-    .value.negative { color: #D85A30; }
-    .section { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; margin-bottom: 1rem; }
-    .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
-    .section-title { font-size: 15px; font-weight: 500; }
-    .add-btn { background: transparent; border: 0.5px solid var(--border2); border-radius: var(--radius); padding: 6px 14px; cursor: pointer; font-size: 13px; color: var(--text); transition: background 0.15s; }
-    .add-btn:hover { background: var(--bg2); }
-    .form-row { display: flex; gap: 8px; margin-bottom: 1rem; flex-wrap: wrap; }
-    .form-row input, .form-row select { flex: 1; min-width: 120px; padding: 8px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; background: var(--bg); color: var(--text); outline: none; }
-    .form-row input:focus, .form-row select:focus { border-color: var(--text2); }
-    .save-btn { background: var(--text); color: var(--bg); border: none; border-radius: var(--radius); padding: 8px 18px; cursor: pointer; font-size: 14px; white-space: nowrap; transition: opacity 0.15s; }
-    .save-btn:hover { opacity: 0.85; }
-    .cat-wrapper { position: relative; flex: 1; min-width: 120px; }
-    .cat-wrapper select { width: 100%; }
-    #expCatCustom { display: none; width: 100%; padding: 8px 12px; border: 0.5px solid var(--border2); border-radius: var(--radius); font-size: 14px; background: var(--bg); color: var(--text); outline: none; }
-    #expCatCustom:focus { border-color: var(--text2); }
-    .item-list { display: flex; flex-direction: column; gap: 6px; }
-    .item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--bg2); border-radius: var(--radius); font-size: 14px; }
-    .item-left { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; }
-    .item-tag { font-size: 11px; padding: 3px 9px; border-radius: 99px; white-space: nowrap; flex-shrink: 0; }
-    .tag-receita  { background: #E1F5EE; color: #0F6E56; }
-    .tag-moradia  { background: #E6F1FB; color: #185FA5; }
-    .tag-alimentacao { background: #FAEEDA; color: #854F0B; }
-    .tag-transporte  { background: #EEEDFE; color: #534AB7; }
-    .tag-saude    { background: #FBEAF0; color: #993556; }
-    .tag-lazer    { background: #FCEBEB; color: #A32D2D; }
-    .tag-outro    { background: #F1EFE8; color: #5F5E5A; }
-    .tag-custom   { background: #F1EFE8; color: #5F5E5A; }
-    .item-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .item-right { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
-    .item-amount { font-weight: 500; }
-    .item-amount.inc { color: #1D9E75; }
-    .item-amount.exp { color: #D85A30; }
-    .del-btn { background: none; border: none; cursor: pointer; font-size: 16px; color: var(--text2); padding: 0; line-height: 1; transition: color 0.15s; }
-    .del-btn:hover { color: #D85A30; }
-    .empty { text-align: center; padding: 2rem; color: var(--text2); font-size: 14px; }
-    .chart-section { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
-    .chart-box { background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; }
-    .chart-title { font-size: 15px; font-weight: 500; margin-bottom: 1rem; }
+
+    /* ── Noise grain overlay ── */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none; z-index: 0;
+    }
+
+    .app { max-width: 900px; margin: 0 auto; position: relative; z-index: 1; }
+
+    /* ── TOP NAV ── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 2.5rem; flex-wrap: wrap; gap: 12px;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-icon {
+      width: 34px; height: 34px; border-radius: 9px;
+      background: linear-gradient(135deg, #7c6dfa 0%, #a78bfa 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px;
+    }
+    .logo h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.02em; }
+    .logo .sub { font-size: 12px; color: var(--text2); font-weight: 400; margin-top: 1px; }
+
+    .month-nav { display: flex; align-items: center; gap: 6px; }
+    .month-nav button {
+      background: var(--bg-card2); border: 0.5px solid var(--border2);
+      border-radius: var(--radius); padding: 8px 13px; cursor: pointer;
+      font-size: 13px; color: var(--text2); transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .month-nav button:hover { background: var(--bg-hover); color: var(--text); border-color: var(--border3); }
+    .month-label {
+      font-size: 14px; font-weight: 500; min-width: 170px; text-align: center;
+      font-family: 'DM Mono', monospace; letter-spacing: 0.02em;
+      color: var(--text);
+    }
+
+    /* ── SUMMARY CARDS ── */
+    .summary {
+      display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px; margin-bottom: 1.5rem;
+    }
+    .metric {
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 20px 22px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .metric::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    }
+    .metric.inc::before { background: linear-gradient(90deg, var(--green), transparent); }
+    .metric.exp::before { background: linear-gradient(90deg, var(--red), transparent); }
+    .metric.bal::before { background: linear-gradient(90deg, var(--accent), transparent); }
+    .metric .label { font-size: 11px; color: var(--text2); margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 500; }
+    .metric .value { font-size: 26px; font-weight: 600; letter-spacing: -0.03em; font-family: 'DM Mono', monospace; }
+    .metric .value.positive { color: var(--green); }
+    .metric .value.negative { color: var(--red); }
+    .metric .value.neutral { color: var(--text); }
+    .metric-glow { position: absolute; width: 80px; height: 80px; border-radius: 50%; right: -20px; top: -20px; opacity: 0.06; }
+    .inc .metric-glow { background: var(--green); }
+    .exp .metric-glow { background: var(--red); }
+    .bal .metric-glow { background: var(--accent); }
+
+    /* ── SECTION ── */
+    .section {
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: 0;
+      margin-bottom: 1rem;
+      overflow: hidden;
+    }
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 22px; border-bottom: 0.5px solid var(--border);
+    }
+    .section-title-wrap { display: flex; align-items: center; gap: 10px; }
+    .section-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+    }
+    .section-dot.inc { background: var(--green); box-shadow: 0 0 8px var(--green); }
+    .section-dot.exp { background: var(--red); box-shadow: 0 0 8px var(--red); }
+    .section-title { font-size: 14px; font-weight: 500; }
+    .section-total { font-size: 13px; font-family: 'DM Mono', monospace; }
+    .section-total.inc { color: var(--green); }
+    .section-total.exp { color: var(--red); }
+
+    .add-btn {
+      background: transparent; border: 0.5px solid var(--border2);
+      border-radius: var(--radius); padding: 7px 14px; cursor: pointer;
+      font-size: 12px; color: var(--text2); transition: all 0.15s;
+      font-family: 'DM Sans', sans-serif; font-weight: 500;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .add-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--border3); }
+
+    /* ── FORM INLINE ── */
+    .form-panel {
+      padding: 16px 22px;
+      border-bottom: 0.5px solid var(--border);
+      background: var(--bg-card2);
+      animation: slideDown 0.2s ease;
+    }
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-8px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .form-grid { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+    .form-field { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 120px; }
+    .form-field label { font-size: 11px; color: var(--text2); font-weight: 500; text-transform: uppercase; letter-spacing: 0.06em; }
+    .form-field input, .form-field select {
+      padding: 9px 13px; border: 0.5px solid var(--border2);
+      border-radius: var(--radius); font-size: 13px;
+      background: var(--bg-input); color: var(--text); outline: none;
+      font-family: 'DM Sans', sans-serif;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .form-field input:focus, .form-field select:focus { border-color: var(--accent); }
+    .form-field select { cursor: pointer; }
+    .form-field select option { background: #1e1e23; }
+
+    .color-row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+    .color-swatch {
+      width: 24px; height: 24px; border-radius: 50%; cursor: pointer;
+      border: 2px solid transparent; transition: all 0.15s; flex-shrink: 0;
+    }
+    .color-swatch:hover { transform: scale(1.15); }
+    .color-swatch.active { border-color: #fff; transform: scale(1.1); }
+
+    .save-btn {
+      background: var(--accent); color: #fff; border: none;
+      border-radius: var(--radius); padding: 9px 20px; cursor: pointer;
+      font-size: 13px; font-weight: 600; white-space: nowrap;
+      font-family: 'DM Sans', sans-serif; transition: all 0.15s;
+      align-self: flex-end;
+    }
+    .save-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+    .save-btn:active { transform: translateY(0); }
+
+    /* ── ITEM LIST ── */
+    .item-list { display: flex; flex-direction: column; }
+    .item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 22px; border-bottom: 0.5px solid var(--border);
+      transition: background 0.12s;
+    }
+    .item:last-child { border-bottom: none; }
+    .item:hover { background: var(--bg-card2); }
+    .item-left { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; }
+    .item-tag {
+      font-size: 11px; padding: 3px 10px; border-radius: 99px;
+      white-space: nowrap; flex-shrink: 0; font-weight: 500; letter-spacing: 0.02em;
+    }
+    .item-name {
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      font-size: 14px; color: var(--text);
+    }
+    .item-right { display: flex; align-items: center; gap: 14px; flex-shrink: 0; }
+    .item-amount {
+      font-size: 14px; font-weight: 600;
+      font-family: 'DM Mono', monospace; letter-spacing: -0.01em;
+    }
+    .item-amount.inc { color: var(--green); }
+    .item-amount.exp { color: var(--red); }
+    .del-btn {
+      background: none; border: none; cursor: pointer;
+      width: 24px; height: 24px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--text3); transition: all 0.15s;
+    }
+    .del-btn:hover { background: var(--red-dim); color: var(--red); }
+    .del-btn svg { width: 13px; height: 13px; }
+
+    .empty {
+      text-align: center; padding: 2.5rem; color: var(--text3);
+      font-size: 13px; font-style: italic;
+    }
+
+    /* ── CHARTS ── */
+    .chart-section {
+      display: grid; grid-template-columns: 1fr 1fr;
+      gap: 12px; margin-bottom: 1rem;
+    }
+    .chart-box {
+      background: var(--bg-card); border: 0.5px solid var(--border);
+      border-radius: var(--radius-xl); padding: 20px 22px;
+    }
+    .chart-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .chart-title { font-size: 13px; font-weight: 500; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; }
     .chart-wrap { position: relative; width: 100%; height: 200px; }
-    .hidden { display: none; }
-    @media (max-width: 600px) {
+
+    /* ── CUSTOM CAT INPUT ── */
+    #expCatCustom { display: none; }
+
+    /* ── UTILS ── */
+    .hidden { display: none !important; }
+
+    /* ── SCROLLBAR ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+
+    /* ── DIVIDER ── */
+    .divider { height: 0.5px; background: var(--border); margin: 0 22px; }
+
+    /* ── PROGRESS BARS ── */
+    .cat-breakdown { padding: 16px 22px; }
+    .cat-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .cat-bar-label { font-size: 12px; color: var(--text2); width: 90px; flex-shrink: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cat-bar-track { flex: 1; height: 5px; background: var(--bg-input); border-radius: 99px; overflow: hidden; }
+    .cat-bar-fill { height: 100%; border-radius: 99px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+    .cat-bar-pct { font-size: 11px; font-family: 'DM Mono', monospace; color: var(--text3); width: 36px; text-align: right; }
+
+    @media (max-width: 640px) {
       .summary { grid-template-columns: 1fr; }
       .chart-section { grid-template-columns: 1fr; }
-      .metric .value { font-size: 20px; }
+      .metric .value { font-size: 22px; }
+      .form-grid { flex-direction: column; }
     }
   </style>
 </head>
 <body>
 <div class="app">
-  <div class="header">
-    <h1>Controle financeiro</h1>
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="logo">
+      <div class="logo-icon">💸</div>
+      <div>
+        <div class="logo h1">Finza</div>
+        <div class="logo sub">Controle financeiro</div>
+      </div>
+    </div>
     <div class="month-nav">
-      <button id="prevMonth">&#8592;</button>
+      <button id="prevMonth">←</button>
       <span class="month-label" id="monthLabel"></span>
-      <button id="nextMonth">&#8594;</button>
+      <button id="nextMonth">→</button>
     </div>
   </div>
 
+  <!-- SUMMARY -->
   <div class="summary">
-    <div class="metric">
+    <div class="metric inc">
+      <div class="metric-glow"></div>
       <div class="label">Receitas</div>
       <div class="value positive" id="totalInc">R$ 0,00</div>
     </div>
-    <div class="metric">
+    <div class="metric exp">
+      <div class="metric-glow"></div>
       <div class="label">Despesas</div>
       <div class="value negative" id="totalExp">R$ 0,00</div>
     </div>
-    <div class="metric">
+    <div class="metric bal">
+      <div class="metric-glow"></div>
       <div class="label">Saldo do mês</div>
-      <div class="value" id="totalBal">R$ 0,00</div>
+      <div class="value neutral" id="totalBal">R$ 0,00</div>
     </div>
   </div>
 
-  <div class="section">
+  <!-- INCOME SECTION -->
+  <div class="section" id="secInc">
     <div class="section-header">
-      <span class="section-title">Receitas</span>
-      <button class="add-btn" id="toggleInc">+ Adicionar</button>
-    </div>
-    <div class="form-row hidden" id="formInc">
-      <input type="text" id="incName" placeholder="Ex: Salário, Freelance..." />
-      <input type="number" id="incAmount" placeholder="Valor em R$" min="0" step="0.01" />
-      <button class="save-btn" id="saveInc">Salvar</button>
-    </div>
-    <div class="item-list" id="listInc"><div class="empty">Nenhuma receita registrada</div></div>
-  </div>
-
-  <div class="section">
-    <div class="section-header">
-      <span class="section-title">Despesas</span>
-      <button class="add-btn" id="toggleExp">+ Adicionar</button>
-    </div>
-    <div class="form-row hidden" id="formExp">
-      <input type="text" id="expName" placeholder="Ex: Aluguel, Mercado..." />
-      <input type="number" id="expAmount" placeholder="Valor em R$" min="0" step="0.01" />
-      <div class="cat-wrapper">
-        <select id="expCat">
-          <option value="moradia">Moradia</option>
-          <option value="alimentacao">Alimentação</option>
-          <option value="transporte">Transporte</option>
-          <option value="saude">Saúde</option>
-          <option value="lazer">Lazer</option>
-          <option value="outro">Outro</option>
-          <option value="__custom__">+ Digitar categoria...</option>
-        </select>
-        <input type="text" id="expCatCustom" placeholder="Nome da categoria" />
+      <div class="section-title-wrap">
+        <span class="section-dot inc"></span>
+        <span class="section-title">Receitas</span>
+        <span class="section-total inc" id="secIncTotal"></span>
       </div>
-      <button class="save-btn" id="saveExp">Salvar</button>
+      <button class="add-btn" id="toggleInc">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Adicionar
+      </button>
     </div>
-    <div class="item-list" id="listExp"><div class="empty">Nenhuma despesa registrada</div></div>
+
+    <div class="form-panel hidden" id="formInc">
+      <div class="form-grid">
+        <div class="form-field" style="flex:2">
+          <label>Descrição</label>
+          <input type="text" id="incName" placeholder="Ex: Salário, Freelance..." />
+        </div>
+        <div class="form-field">
+          <label>Valor (R$)</label>
+          <input type="number" id="incAmount" placeholder="0,00" min="0" step="0.01" />
+        </div>
+        <button class="save-btn" id="saveInc">Salvar</button>
+      </div>
+    </div>
+
+    <div class="item-list" id="listInc"><div class="empty">Nenhuma receita registrada ainda</div></div>
   </div>
 
+  <!-- EXPENSES SECTION -->
+  <div class="section" id="secExp">
+    <div class="section-header">
+      <div class="section-title-wrap">
+        <span class="section-dot exp"></span>
+        <span class="section-title">Despesas</span>
+        <span class="section-total exp" id="secExpTotal"></span>
+      </div>
+      <button class="add-btn" id="toggleExp">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1v10M1 6h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Adicionar
+      </button>
+    </div>
+
+    <div class="form-panel hidden" id="formExp">
+      <div class="form-grid">
+        <div class="form-field" style="flex:2">
+          <label>Descrição</label>
+          <input type="text" id="expName" placeholder="Ex: Aluguel, Mercado..." />
+        </div>
+        <div class="form-field">
+          <label>Valor (R$)</label>
+          <input type="number" id="expAmount" placeholder="0,00" min="0" step="0.01" />
+        </div>
+        <div class="form-field">
+          <label>Categoria</label>
+          <select id="expCat">
+            <option value="moradia">Moradia</option>
+            <option value="alimentacao">Alimentação</option>
+            <option value="transporte">Transporte</option>
+            <option value="saude">Saúde</option>
+            <option value="lazer">Lazer</option>
+            <option value="outro">Outro</option>
+            <option value="__custom__">+ Nova categoria...</option>
+          </select>
+          <input type="text" id="expCatCustom" placeholder="Nome da categoria" style="display:none;padding:9px 13px;border:0.5px solid var(--border2);border-radius:var(--radius);font-size:13px;background:var(--bg-input);color:var(--text);outline:none;font-family:'DM Sans',sans-serif;margin-top:5px;" />
+        </div>
+        <div class="form-field" id="colorPickerField">
+          <label>Cor da categoria</label>
+          <div class="color-row" id="colorPicker"></div>
+        </div>
+        <button class="save-btn" id="saveExp">Salvar</button>
+      </div>
+    </div>
+
+    <div class="item-list" id="listExp"><div class="empty">Nenhuma despesa registrada ainda</div></div>
+  </div>
+
+  <!-- CHARTS -->
   <div class="chart-section">
     <div class="chart-box">
-      <div class="chart-title">Despesas por categoria</div>
+      <div class="chart-header">
+        <span class="chart-title">Por categoria</span>
+      </div>
       <div class="chart-wrap"><canvas id="catChart"></canvas></div>
     </div>
     <div class="chart-box">
-      <div class="chart-title">Receitas vs Despesas</div>
+      <div class="chart-header">
+        <span class="chart-title">Receitas vs Despesas</span>
+      </div>
       <div class="chart-wrap"><canvas id="barChart"></canvas></div>
     </div>
   </div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
-  const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
-  const DEFAULT_CATS = ['moradia','alimentacao','transporte','saude','lazer','outro'];
-  const DEFAULT_LABELS = { moradia:'Moradia', alimentacao:'Alimentação', transporte:'Transporte', saude:'Saúde', lazer:'Lazer', outro:'Outro' };
-  const PALETTE = ['#378ADD','#EF9F27','#7F77DD','#D4537E','#E24B4A','#888780','#1D9E75','#B47ADE','#E8A838','#5DB8B0','#C45FA0','#6A8FD8'];
-  const INC_COLOR = '#1D9E75';
-  const EXP_COLOR = '#D85A30';
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
-  let now = new Date();
-  let year = now.getFullYear();
-  let month = now.getMonth();
-  let catChartInst = null, barChartInst = null;
+const DEFAULT_CATS = {
+  moradia:     { label: 'Moradia',     color: '#378ADD' },
+  alimentacao: { label: 'Alimentação', color: '#EF9F27' },
+  transporte:  { label: 'Transporte',  color: '#7F77DD' },
+  saude:       { label: 'Saúde',       color: '#28c78b' },
+  lazer:       { label: 'Lazer',       color: '#D4537E' },
+  outro:       { label: 'Outro',       color: '#888780' },
+};
 
-  function key() { return `fin_${year}_${month}`; }
-  function load() {
-    try { return JSON.parse(localStorage.getItem(key())) || {inc:[],exp:[]}; }
-    catch(e) { return {inc:[],exp:[]}; }
-  }
-  function save(data) { localStorage.setItem(key(), JSON.stringify(data)); }
-  function fmt(n) { return 'R$ ' + n.toLocaleString('pt-BR', {minimumFractionDigits:2,maximumFractionDigits:2}); }
+const PALETTE_SWATCHES = [
+  '#7c6dfa','#28c78b','#f2533d','#f5a623','#378ADD',
+  '#D4537E','#EF9F27','#7F77DD','#5DB8B0','#C45FA0',
+  '#6A8FD8','#E8A838','#888780','#4CAF50','#FF7043',
+];
 
-  function catLabel(cat) {
-    return DEFAULT_LABELS[cat] || cat;
-  }
+let selectedColor = PALETTE_SWATCHES[0];
+let now = new Date();
+let year = now.getFullYear();
+let month = now.getMonth();
+let catChartInst = null, barChartInst = null;
 
-  function catClass(cat) {
-    if (DEFAULT_CATS.includes(cat)) return 'tag-' + cat;
-    return 'tag-custom';
-  }
+function key() { return `fin2_${year}_${month}`; }
+function load() {
+  try { return JSON.parse(localStorage.getItem(key())) || {inc:[],exp:[]}; }
+  catch(e) { return {inc:[],exp:[]}; }
+}
+function save(data) { localStorage.setItem(key(), JSON.stringify(data)); }
 
-  const expCatSel = document.getElementById('expCat');
-  const expCatCustom = document.getElementById('expCatCustom');
+function fmt(n) {
+  return 'R$\u00a0' + n.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
 
-  expCatSel.addEventListener('change', () => {
-    if (expCatSel.value === '__custom__') {
-      expCatSel.style.display = 'none';
-      expCatCustom.style.display = 'block';
-      expCatCustom.focus();
-    }
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function catInfo(cat) {
+  if (DEFAULT_CATS[cat]) return DEFAULT_CATS[cat];
+  const d = load();
+  const found = d.exp.find(e => e.cat === cat);
+  return { label: cat, color: (found && found.catColor) || '#888780' };
+}
+
+function hexToRgb(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+function tagStyle(color) {
+  return `background:${color}22; color:${color}; border:0.5px solid ${color}44;`;
+}
+
+// ── COLOR PICKER ──
+function buildColorPicker() {
+  const el = document.getElementById('colorPicker');
+  el.innerHTML = '';
+  PALETTE_SWATCHES.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className = 'color-swatch' + (c === selectedColor ? ' active' : '');
+    sw.style.background = c;
+    sw.title = c;
+    sw.onclick = () => { selectedColor = c; buildColorPicker(); };
+    el.appendChild(sw);
   });
+}
 
-  expCatCustom.addEventListener('blur', () => {
-    if (!expCatCustom.value.trim()) {
-      expCatSel.style.display = 'block';
-      expCatCustom.style.display = 'none';
-      expCatSel.value = 'outro';
+// Show/hide color picker based on if default cat or custom
+function updateColorPickerVisibility() {
+  const sel = document.getElementById('expCat');
+  const field = document.getElementById('colorPickerField');
+  // Always show for all cases so user can customize
+  field.style.display = 'flex';
+}
+
+// ── CAT SELECT ──
+const expCatSel = document.getElementById('expCat');
+const expCatCustom = document.getElementById('expCatCustom');
+
+expCatSel.addEventListener('change', () => {
+  if (expCatSel.value === '__custom__') {
+    expCatSel.style.display = 'none';
+    expCatCustom.style.display = 'block';
+    expCatCustom.focus();
+    // Set a vivid default color for custom
+    selectedColor = PALETTE_SWATCHES[Math.floor(Math.random()*5)];
+    buildColorPicker();
+  } else {
+    // Preset the color swatch to match default cat
+    if (DEFAULT_CATS[expCatSel.value]) {
+      selectedColor = DEFAULT_CATS[expCatSel.value].color;
+      buildColorPicker();
     }
-  });
+  }
+});
 
-  function resetCatInput() {
+expCatCustom.addEventListener('blur', () => {
+  if (!expCatCustom.value.trim()) {
     expCatSel.style.display = 'block';
     expCatCustom.style.display = 'none';
-    expCatCustom.value = '';
-    expCatSel.value = 'moradia';
+    expCatSel.value = 'outro';
   }
+});
 
-  function render() {
-    document.getElementById('monthLabel').textContent = MONTHS[month] + ' ' + year;
-    const data = load();
-    const totalInc = data.inc.reduce((s,i) => s + i.amount, 0);
-    const totalExp = data.exp.reduce((s,i) => s + i.amount, 0);
-    const bal = totalInc - totalExp;
+function resetCatInput() {
+  expCatSel.style.display = 'block';
+  expCatCustom.style.display = 'none';
+  expCatCustom.value = '';
+  expCatSel.value = 'moradia';
+  selectedColor = DEFAULT_CATS['moradia'].color;
+  buildColorPicker();
+}
 
-    document.getElementById('totalInc').textContent = fmt(totalInc);
-    document.getElementById('totalExp').textContent = fmt(totalExp);
-    const balEl = document.getElementById('totalBal');
-    balEl.textContent = fmt(bal);
-    balEl.className = 'value ' + (bal > 0 ? 'positive' : bal < 0 ? 'negative' : '');
+// ── RENDER ──
+function render() {
+  document.getElementById('monthLabel').textContent = MONTHS[month] + '  ' + year;
+  const data = load();
+  const totalInc = data.inc.reduce((s,i) => s+i.amount, 0);
+  const totalExp = data.exp.reduce((s,i) => s+i.amount, 0);
+  const bal = totalInc - totalExp;
 
-    const listInc = document.getElementById('listInc');
-    listInc.innerHTML = data.inc.length === 0
-      ? '<div class="empty">Nenhuma receita registrada</div>'
-      : data.inc.map((it,i) => `<div class="item">
-          <div class="item-left"><span class="item-tag tag-receita">receita</span><span class="item-name">${escHtml(it.name)}</span></div>
-          <div class="item-right"><span class="item-amount inc">${fmt(it.amount)}</span><button class="del-btn" onclick="delInc(${i})">&#x2715;</button></div>
-        </div>`).join('');
+  document.getElementById('totalInc').textContent = fmt(totalInc);
+  document.getElementById('totalExp').textContent = fmt(totalExp);
 
-    const listExp = document.getElementById('listExp');
-    listExp.innerHTML = data.exp.length === 0
-      ? '<div class="empty">Nenhuma despesa registrada</div>'
-      : data.exp.map((it,i) => `<div class="item">
-          <div class="item-left"><span class="item-tag ${catClass(it.cat)}">${escHtml(catLabel(it.cat))}</span><span class="item-name">${escHtml(it.name)}</span></div>
-          <div class="item-right"><span class="item-amount exp">${fmt(it.amount)}</span><button class="del-btn" onclick="delExp(${i})">&#x2715;</button></div>
-        </div>`).join('');
+  const balEl = document.getElementById('totalBal');
+  balEl.textContent = fmt(bal);
+  balEl.className = 'value ' + (bal > 0 ? 'positive' : bal < 0 ? 'negative' : 'neutral');
 
-    renderCharts(data, totalInc, totalExp);
-  }
+  // Section totals
+  document.getElementById('secIncTotal').textContent = totalInc > 0 ? fmt(totalInc) : '';
+  document.getElementById('secExpTotal').textContent = totalExp > 0 ? fmt(totalExp) : '';
 
-  function escHtml(s) {
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
+  // Income list
+  const listInc = document.getElementById('listInc');
+  listInc.innerHTML = data.inc.length === 0
+    ? '<div class="empty">Nenhuma receita registrada ainda</div>'
+    : data.inc.map((it,i) => `
+      <div class="item">
+        <div class="item-left">
+          <span class="item-tag" style="${tagStyle('#28c78b')}">receita</span>
+          <span class="item-name">${esc(it.name)}</span>
+        </div>
+        <div class="item-right">
+          <span class="item-amount inc">${fmt(it.amount)}</span>
+          <button class="del-btn" onclick="delInc(${i})" title="Remover">
+            <svg viewBox="0 0 13 13" fill="none"><path d="M1 1l11 11M12 1L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+      </div>`).join('');
 
-  function renderCharts(data, totalInc, totalExp) {
-    // Group expenses by category (including custom ones)
-    const catMap = {};
-    data.exp.forEach(e => {
-      catMap[e.cat] = (catMap[e.cat] || 0) + e.amount;
-    });
-    const cats = Object.keys(catMap);
-    const catTotals = cats.map(c => catMap[c]);
-    const catColors = cats.map((_, i) => PALETTE[i % PALETTE.length]);
-    const catLabels = cats.map(c => catLabel(c));
+  // Expense list
+  const listExp = document.getElementById('listExp');
+  listExp.innerHTML = data.exp.length === 0
+    ? '<div class="empty">Nenhuma despesa registrada ainda</div>'
+    : data.exp.map((it,i) => {
+        const info = DEFAULT_CATS[it.cat]
+          ? { label: DEFAULT_CATS[it.cat].label, color: it.catColor || DEFAULT_CATS[it.cat].color }
+          : { label: it.cat, color: it.catColor || '#888780' };
+        return `
+        <div class="item">
+          <div class="item-left">
+            <span class="item-tag" style="${tagStyle(info.color)}">${esc(info.label)}</span>
+            <span class="item-name">${esc(it.name)}</span>
+          </div>
+          <div class="item-right">
+            <span class="item-amount exp">${fmt(it.amount)}</span>
+            <button class="del-btn" onclick="delExp(${i})" title="Remover">
+              <svg viewBox="0 0 13 13" fill="none"><path d="M1 1l11 11M12 1L1 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </button>
+          </div>
+        </div>`;
+      }).join('');
 
-    if(catChartInst) { catChartInst.destroy(); catChartInst = null; }
-    if(barChartInst) { barChartInst.destroy(); barChartInst = null; }
+  renderCharts(data, totalInc, totalExp);
+}
 
-    catChartInst = new Chart(document.getElementById('catChart'), {
-      type: 'doughnut',
-      data: {
-        labels: catLabels,
-        datasets: [{ data: catTotals, backgroundColor: catColors, borderWidth: 0 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { position: 'bottom', labels: { font: { size: 11 }, boxWidth: 10, padding: 10, color: '#888780' } },
-          tooltip: { callbacks: { label: c => ' ' + fmt(c.raw) } }
+function renderCharts(data, totalInc, totalExp) {
+  const catMap = {};
+  const colorMap = {};
+  data.exp.forEach(e => {
+    const info = DEFAULT_CATS[e.cat]
+      ? { label: DEFAULT_CATS[e.cat].label, color: e.catColor || DEFAULT_CATS[e.cat].color }
+      : { label: e.cat, color: e.catColor || '#888780' };
+    catMap[e.cat] = (catMap[e.cat] || 0) + e.amount;
+    if (!colorMap[e.cat]) colorMap[e.cat] = info.color;
+  });
+  const cats = Object.keys(catMap);
+  const catTotals = cats.map(c => catMap[c]);
+  const catColors = cats.map(c => colorMap[c]);
+  const catLabels = cats.map(c => DEFAULT_CATS[c] ? DEFAULT_CATS[c].label : c);
+
+  const gridColor = 'rgba(255,255,255,0.05)';
+  const tickColor = '#555552';
+
+  if(catChartInst) { catChartInst.destroy(); catChartInst = null; }
+  if(barChartInst) { barChartInst.destroy(); barChartInst = null; }
+
+  catChartInst = new Chart(document.getElementById('catChart'), {
+    type: 'doughnut',
+    data: {
+      labels: catLabels,
+      datasets: [{
+        data: catTotals,
+        backgroundColor: catColors,
+        borderWidth: 3,
+        borderColor: '#131316',
+        hoverBorderColor: '#131316',
+        hoverOffset: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            font: { size: 11, family: 'DM Sans' },
+            boxWidth: 8, boxHeight: 8,
+            padding: 12, color: '#888884',
+            usePointStyle: true, pointStyleWidth: 8,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#1a1a1e',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 0.5,
+          titleFont: { family: 'DM Sans', size: 12 },
+          bodyFont: { family: 'DM Mono', size: 13 },
+          padding: 10,
+          callbacks: { label: c => '  ' + fmt(c.raw) }
         }
       }
-    });
-
-    barChartInst = new Chart(document.getElementById('barChart'), {
-      type: 'bar',
-      data: {
-        labels: ['Receitas', 'Despesas'],
-        datasets: [{
-          data: [totalInc, totalExp],
-          backgroundColor: [INC_COLOR, EXP_COLOR],
-          borderRadius: 6, borderWidth: 0
-        }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: c => ' ' + fmt(c.raw) } } },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: '#888780' } },
-          y: { grid: { color: 'rgba(128,128,120,0.15)' }, ticks: { color: '#888780', callback: v => 'R$ ' + v.toLocaleString('pt-BR') } }
-        }
-      }
-    });
-  }
-
-  window.delInc = function(i) { const d=load(); d.inc.splice(i,1); save(d); render(); };
-  window.delExp = function(i) { const d=load(); d.exp.splice(i,1); save(d); render(); };
-
-  document.getElementById('prevMonth').onclick = () => { month--; if(month<0){month=11;year--;} render(); };
-  document.getElementById('nextMonth').onclick = () => { month++; if(month>11){month=0;year++;} render(); };
-
-  document.getElementById('toggleInc').onclick = () => document.getElementById('formInc').classList.toggle('hidden');
-  document.getElementById('toggleExp').onclick = () => document.getElementById('formExp').classList.toggle('hidden');
-
-  document.getElementById('saveInc').onclick = () => {
-    const name = document.getElementById('incName').value.trim();
-    const amount = parseFloat(document.getElementById('incAmount').value);
-    if(!name || isNaN(amount) || amount <= 0) return;
-    const d = load(); d.inc.push({name, amount}); save(d);
-    document.getElementById('incName').value = '';
-    document.getElementById('incAmount').value = '';
-    document.getElementById('formInc').classList.add('hidden');
-    render();
-  };
-
-  document.getElementById('saveExp').onclick = () => {
-    const name = document.getElementById('expName').value.trim();
-    const amount = parseFloat(document.getElementById('expAmount').value);
-    if(!name || isNaN(amount) || amount <= 0) return;
-
-    let cat;
-    if (expCatSel.style.display === 'none') {
-      cat = expCatCustom.value.trim();
-      if (!cat) return;
-    } else {
-      cat = expCatSel.value;
     }
+  });
 
-    const d = load(); d.exp.push({name, amount, cat}); save(d);
-    document.getElementById('expName').value = '';
-    document.getElementById('expAmount').value = '';
-    document.getElementById('formExp').classList.add('hidden');
-    resetCatInput();
-    render();
-  };
+  barChartInst = new Chart(document.getElementById('barChart'), {
+    type: 'bar',
+    data: {
+      labels: ['Receitas', 'Despesas'],
+      datasets: [{
+        data: [totalInc, totalExp],
+        backgroundColor: ['rgba(40,199,139,0.85)', 'rgba(242,83,61,0.85)'],
+        borderRadius: 8,
+        borderWidth: 0,
+        hoverBackgroundColor: ['rgba(40,199,139,1)', 'rgba(242,83,61,1)'],
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#1a1a1e',
+          borderColor: 'rgba(255,255,255,0.1)',
+          borderWidth: 0.5,
+          titleFont: { family: 'DM Sans', size: 12 },
+          bodyFont: { family: 'DM Mono', size: 13 },
+          padding: 10,
+          callbacks: { label: c => '  ' + fmt(c.raw) }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: { color: tickColor, font: { family: 'DM Sans', size: 12 } },
+          border: { color: gridColor }
+        },
+        y: {
+          grid: { color: gridColor },
+          ticks: {
+            color: tickColor,
+            font: { family: 'DM Mono', size: 11 },
+            callback: v => 'R$\u00a0' + v.toLocaleString('pt-BR')
+          },
+          border: { color: gridColor }
+        }
+      }
+    }
+  });
+}
 
-  document.getElementById('incAmount').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveInc').click(); });
-  document.getElementById('expAmount').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveExp').click(); });
-  expCatCustom.addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveExp').click(); });
+// ── ACTIONS ──
+window.delInc = function(i) { const d=load(); d.inc.splice(i,1); save(d); render(); };
+window.delExp = function(i) { const d=load(); d.exp.splice(i,1); save(d); render(); };
 
+document.getElementById('prevMonth').onclick = () => { month--; if(month<0){month=11;year--;} render(); };
+document.getElementById('nextMonth').onclick = () => { month++; if(month>11){month=0;year++;} render(); };
+
+document.getElementById('toggleInc').onclick = () => {
+  const f = document.getElementById('formInc');
+  f.classList.toggle('hidden');
+};
+document.getElementById('toggleExp').onclick = () => {
+  const f = document.getElementById('formExp');
+  f.classList.toggle('hidden');
+};
+
+document.getElementById('saveInc').onclick = () => {
+  const name = document.getElementById('incName').value.trim();
+  const amount = parseFloat(document.getElementById('incAmount').value);
+  if(!name || isNaN(amount) || amount <= 0) return;
+  const d = load(); d.inc.push({name, amount}); save(d);
+  document.getElementById('incName').value = '';
+  document.getElementById('incAmount').value = '';
+  document.getElementById('formInc').classList.add('hidden');
   render();
+};
+
+document.getElementById('saveExp').onclick = () => {
+  const name = document.getElementById('expName').value.trim();
+  const amount = parseFloat(document.getElementById('expAmount').value);
+  if(!name || isNaN(amount) || amount <= 0) return;
+
+  let cat;
+  if (expCatSel.style.display === 'none') {
+    cat = expCatCustom.value.trim();
+    if (!cat) return;
+  } else {
+    cat = expCatSel.value;
+  }
+
+  const d = load();
+  d.exp.push({ name, amount, cat, catColor: selectedColor });
+  save(d);
+  document.getElementById('expName').value = '';
+  document.getElementById('expAmount').value = '';
+  document.getElementById('formExp').classList.add('hidden');
+  resetCatInput();
+  render();
+};
+
+// Enter key
+document.getElementById('incAmount').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveInc').click(); });
+document.getElementById('expAmount').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveExp').click(); });
+document.getElementById('expCatCustom').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('saveExp').click(); });
+
+// Init
+buildColorPicker();
+// Set initial swatch to moradia color
+selectedColor = DEFAULT_CATS['moradia'].color;
+buildColorPicker();
+render();
 </script>
 </body>
 </html>
